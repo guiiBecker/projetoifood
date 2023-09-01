@@ -1,0 +1,83 @@
+- Criação das tabelas
+CREATE TABLE User (
+    UserID INT PRIMARY KEY,
+    Nome VARCHAR(255),
+    Email VARCHAR(255),
+    Endereco VARCHAR(255)
+);
+
+CREATE TABLE Category (
+    CategoryID INT PRIMARY KEY,
+    NomeCategoria VARCHAR(255)
+);
+
+CREATE TABLE Product (
+    ProductID INT PRIMARY KEY,
+    NomeProduto VARCHAR(255),
+    Descricao TEXT,
+    Preco DECIMAL(10, 2),
+    CategoriaID INT,
+    FOREIGN KEY (CategoriaID) REFERENCES Category(CategoryID)
+);
+
+CREATE TABLE Orde (
+    OrderID INT PRIMARY KEY,
+    UserID INT,
+    DataPedido DATE,
+    StatusPedido VARCHAR(50),
+    FOREIGN KEY (UserID) REFERENCES User(UserID)
+);
+
+CREATE TABLE OrderItem (
+    OrderItemID INT PRIMARY KEY,
+    OrderID INT,
+    ProductID INT,
+    Quantidade INT,
+    PrecoUnitario DECIMAL(10, 2),
+    FOREIGN KEY (OrderID) REFERENCES Order(OrderID),
+    FOREIGN KEY (ProductID) REFERENCES Product(ProductID)
+);
+
+-- Inserção de dados de exemplo
+INSERT INTO User (UserID, Nome, Email, Endereco)
+VALUES (1, 'João', 'joao@example.com', 'Rua A, 123');
+
+INSERT INTO Category (CategoryID, NomeCategoria)
+VALUES (1, 'Eletrônicos');
+
+INSERT INTO Product (ProductID, NomeProduto, Descricao, Preco, CategoriaID)
+VALUES (1, 'Smartphone', 'Um smartphone de última geração', 999.99, 1);
+
+INSERT INTO Orde (OrderID, UserID, DataPedido, StatusPedido)
+VALUES (1, 1, '2023-08-31', 'Em processamento');
+
+INSERT INTO OrderItem (OrderItemID, OrderID, ProductID, Quantidade, PrecoUnitario)
+VALUES (1, 1, 1, 2, 999.99);
+
+-- Consultas SQL
+
+-- Recuperação simples de todos os produtos
+SELECT * FROM Product;
+
+-- Filtro de produtos por categoria
+SELECT * FROM Product WHERE CategoriaID = 1;
+
+-- Criação de atributo derivado (Preço Total) em uma consulta
+SELECT OrderID, ProductID, Quantidade, PrecoUnitario, Quantidade * PrecoUnitario AS PrecoTotal
+FROM OrderItem;
+
+-- Ordenação de produtos por preço em ordem decrescente
+SELECT * FROM Product ORDER BY Preco DESC;
+
+-- Condições de filtro para grupos (obter pedidos com mais de 1 item)
+SELECT OrderID, COUNT(OrderItemID) AS NumItems
+FROM OrderItem
+GROUP BY OrderID
+HAVING NumItems > 1;
+
+-- Junção entre tabelas para obter informações de pedidos e produtos
+SELECT o.OrderID, u.Nome AS NomeUsuario, p.NomeProduto, oi.Quantidade, oi.PrecoUnitario
+FROM Order o
+INNER JOIN User u ON o.UserID = u.UserID
+INNER JOIN OrderItem oi ON o.OrderID = oi.OrderID
+INNER JOIN Product p ON oi.ProductID = p.ProductID;
